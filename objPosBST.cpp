@@ -354,6 +354,20 @@ bool objPosBST::findGreater(const int numThreshold, const TNode* thisNode) const
     //     Otherwise, return false.
 
     // HINT:  If you do this right, the algorithm is less than 10 lines.
+
+    // Determines whether any node in this subtree exceeds the threshold.
+    // Both subtrees must be searched because the BST is ordered by prefix,
+    // not by the objPos number field.
+
+    if(thisNode == nullptr)
+        return false;
+
+    // Recursively inspect both subtrees, then compare the current node.
+    bool leftGreater = findGreater(numThreshold, thisNode->left);
+    bool rightGreater = findGreater(numThreshold, thisNode->right);
+    bool currentGreater = thisNode->data.getNum() > numThreshold;
+
+    return leftGreater || rightGreater || currentGreater;
 }
 
 bool objPosBST::findGreater(const int numThreshold) const
