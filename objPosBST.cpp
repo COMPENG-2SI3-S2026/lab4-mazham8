@@ -138,6 +138,23 @@ int objPosBST::getHeight(const TNode* thisNode) const
     //    the returned heights.
 
     // 3. Compare the two returned heights, and return the larger one.
+
+    // Returns the number of levels in the subtree rooted at thisNode.
+    // An empty subtree has height zero; otherwise, the larger child
+    // height determines the height of the current subtree.
+
+    if(thisNode == nullptr)
+        return 0;
+
+    // Recursively calculate both subtree heights because the longer
+    // root-to-leaf path determines the current subtree height.
+    int leftHeight = getHeight(thisNode->left);
+    int rightHeight = getHeight(thisNode->right);
+
+    if(leftHeight > rightHeight)
+        return leftHeight + 1; // include the current node's level
+
+    return rightHeight + 1; // right subtree is equal or taller
 }
 
 void objPosBST::printCurrentLevel(const TNode* thisNode, const int level) const
@@ -154,6 +171,24 @@ void objPosBST::printCurrentLevel(const TNode* thisNode, const int level) const
 
     // You may add other character formatting features to make the tree more readable.
     // (you will be asked to demo this feature during the lab demo!!)
+
+    // Prints every node found at the requested level of this subtree.
+    // Null subtrees contribute no output, while level one prints
+    // the prefix stored in the current node.
+
+    if(thisNode == nullptr)
+        return;
+
+    if(level == 1)
+    {
+        cout << thisNode->data.getPF() << " ";
+        return;
+    }
+
+    // Move one level deeper through both children while preserving
+    // left-to-right order within the requested tree level.
+    printCurrentLevel(thisNode->left, level - 1);
+    printCurrentLevel(thisNode->right, level - 1);
 }
 
 // Public Interface.
@@ -166,6 +201,28 @@ void objPosBST::printTreeLevel() const
 
     // You may add other character formatting features to make the tree more readable.
     // (you will be asked to demo this feature during the lab demo!!)
+
+    // Prints the BST one level at a time from the root downward.
+    // Each level is generated recursively in left-to-right order.
+    // An empty tree produces the standard empty-tree message.
+
+    if(root == nullptr)
+    {
+        cout << "[Empty]" << endl;
+        return;
+    }
+
+    int treeHeight = getHeight(root);
+
+    // Request each tree level separately, beginning at the root level.
+    for(int currentLevel = 1;
+        currentLevel <= treeHeight;
+        currentLevel++)
+    {
+        cout << "Level " << currentLevel << ": ";
+        printCurrentLevel(root, currentLevel);
+        cout << endl;
+    }
 }
 
 bool objPosBST::isInTree(const objPos& thisPos, const TNode* thisNode) const
