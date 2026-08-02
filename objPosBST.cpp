@@ -256,6 +256,18 @@ const TNode* objPosBST::findMin(const TNode* thisNode) const
     // Used as part of remove() algorithm
 
     // Check Lecture Notes for implementation
+
+    // Finds the node with the smallest prefix in this subtree.
+    // The minimum node is reached by repeatedly following left children.
+
+    if(thisNode == nullptr)
+        return nullptr;
+
+    // A node with no left child is the smallest node in this subtree.
+    if(thisNode->left == nullptr)
+        return thisNode;
+
+    return findMin(thisNode->left); // continue toward the smallest prefix
 }
 
 
@@ -270,6 +282,55 @@ void objPosBST::remove(const objPos &thisPos, TNode* &thisNode)
 
     // Case 3 - Delete the node with 2 children
     //   You can use either methods (check lecture notes)
+
+    // Removes the node whose prefix matches the provided objPos.
+    // The parent linkage is updated while preserving the BST invariant.
+    // A missing prefix leaves the tree unchanged.
+
+    if(thisNode == nullptr)
+        return;
+
+    // Follow the BST search path until the matching prefix is found.
+    if(thisPos.getPF() < thisNode->data.getPF())
+    {
+        remove(thisPos, thisNode->left);
+    }
+    else if(thisPos.getPF() > thisNode->data.getPF())
+    {
+        remove(thisPos, thisNode->right);
+    }
+    else
+    {
+        // Case 1 or 2: the node has no left child.
+        // This covers both a leaf and a node with only a right child.
+        if(thisNode->left == nullptr)
+        {
+            TNode* targetNode = thisNode; // preserve the node before unlinking it
+            thisNode = thisNode->right;   // parent now points to the right child
+            delete targetNode;            // release the removed node
+        }
+
+        // Case 2: the node has a left child but no right child.
+        else if(thisNode->right == nullptr)
+        {
+            TNode* targetNode = thisNode; // preserve the node before unlinking it
+            thisNode = thisNode->left;    // parent now points to the left child
+            delete targetNode;            // release the removed node
+        }
+
+        // Case 3: the node has two children.
+        else
+        {
+            // Use the in-order successor: the smallest node in the right subtree.
+            const TNode* successorNode = findMin(thisNode->right);
+
+            // Copy the successor data into the node being logically removed.
+            thisNode->data = successorNode->data;
+
+            // Remove the original successor node to avoid duplicate prefixes.
+            remove(successorNode->data, thisNode->right);
+        }
+    }
 }
 
 // Public Interface, Implemented
