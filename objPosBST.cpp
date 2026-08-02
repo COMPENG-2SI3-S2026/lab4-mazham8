@@ -6,12 +6,23 @@ using namespace std;
 objPosBST::objPosBST()
 {
     // Constructor (Check Lecture Notes for Implementation, Simple)
+
+    // Creates an empty binary search tree.
+    // The root pointer does not reference a node initially.
+
+    root = nullptr;    
 }
 
 objPosBST::~objPosBST()
 {
     // Destructor
     // Invoke delete tree, then set root to NULL
+
+    // Releases every dynamically allocated node in the tree.
+    // The public deletion method restores the empty-tree invariant.
+
+    deleteTree();
+    root = nullptr;
 }
 
 void objPosBST::deleteTree(const TNode* thisNode)
@@ -20,6 +31,16 @@ void objPosBST::deleteTree(const TNode* thisNode)
 
     // Question from Class - Which Traversal Order should you use for this method?
     //   WARNING - using the wrong one will result in potential heap error.
+
+    // Deletes every node in the subtree using post-order traversal.
+    // Child nodes are deleted before their parent node.
+
+    if(thisNode == nullptr) // if empty tree, just return
+        return;
+
+    deleteTree(thisNode->left); // left -> right -> parent
+    deleteTree(thisNode->right);
+    delete thisNode;
 }
 
 // Public Interface, Implemented
@@ -33,6 +54,11 @@ bool objPosBST::isEmptyTree() const
 {
     // Check if tree is empty
     //  Really simple, think about how.
+
+    // Determines whether the BST currently contains no nodes.
+    // An empty tree is represented by a null root pointer.
+
+    return root == nullptr;
 }
 
 
@@ -49,6 +75,20 @@ bool objPosBST::isLeaf(const objPos &thisPos, const TNode* thisNode) const
     //      - If equal, check if the node is a leaf node
 
     // Remember, leaf nodes do not have children nodes
+
+    // Searches by prefix and checks whether the matching node is a leaf.
+    // A missing prefix returns false; a leaf has no child nodes.
+
+    if(thisNode == nullptr)
+        return false;
+
+    if(thisPos.getPF() < thisNode->data.getPF())
+        return isLeaf(thisPos, thisNode->left);
+
+    if(thisPos.getPF() > thisNode->data.getPF())
+        return isLeaf(thisPos, thisNode->right);
+
+    return thisNode->left == nullptr && thisNode->right == nullptr;
 }
 
 bool objPosBST::isLeaf(const objPos &thisPos) const
@@ -65,6 +105,16 @@ void objPosBST::printTree(const TNode* thisNode) const  // private recursive
     // e.g.  N30 P25 etc.
 
     // DO NOT use printObjPos() as it will mess up the game display.
+
+    // Prints the subtree using in-order traversal. left subtree -> parent -> right subtree
+    // Prefix ordering makes the output ascending by prefix.
+
+    if(thisNode == nullptr)
+        return;
+
+    printTree(thisNode->left);
+    cout << thisNode->data.getPF() << thisNode->data.getNum() << " ";
+    printTree(thisNode->right);
 }
 
 void objPosBST::printTree() const  // public interface
@@ -129,6 +179,24 @@ bool objPosBST::isInTree(const objPos& thisPos, const TNode* thisNode) const
     //    against the Prefix of thisPos
     //      - If not equal, follow the BST search rules
     //      - If equal, return true
+
+    // Searches the BST recursively using the objPos prefix field.
+    // Reaching a null subtree means the requested prefix is absent.
+
+    // for every node target prefix < current prefix  → search left
+    // target prefix > current prefix  → search right
+    // target prefix == current prefix → found
+
+    if(thisNode == nullptr)
+        return false;
+
+    if(thisPos.getPF() < thisNode->data.getPF())
+        return isInTree(thisPos, thisNode->left);
+
+    if(thisPos.getPF() > thisNode->data.getPF())
+        return isInTree(thisPos, thisNode->right);
+
+    return true;
 }
 
 // Public Interface, Implemented
@@ -149,6 +217,29 @@ void objPosBST::insert(const objPos &thisPos, TNode* &thisNode)
     //   If the node is already in the tree (i.e. Prefix match found)
     //   Add the number member of thisPos to the number member of the objPos data at the node
     //   (DO NOT JUST IGNORE.  ADD NUMBERS!!)
+
+        // Inserts a new node according to its prefix ordering.
+    // A duplicate prefix adds its number to the existing node.
+
+    if(thisNode == nullptr)
+    {
+        thisNode = new TNode(thisPos); // create a node at the empty subtree
+        return;
+    }
+
+    if(thisPos.getPF() < thisNode->data.getPF())
+    {
+        insert(thisPos, thisNode->left);
+    }
+    else if(thisPos.getPF() > thisNode->data.getPF())
+    {
+        insert(thisPos, thisNode->right);
+    }
+    else
+    {
+        int updatedNumber = thisNode->data.getNum() + thisPos.getNum();
+        thisNode->data.setNum(updatedNumber); // merge the duplicate-prefix score
+    }
 }
 
 // Public Interface, Implemented
